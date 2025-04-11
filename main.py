@@ -42,7 +42,7 @@ async def main():
 
     def is_owner():
         def predicate(ctx):
-            return ctx.message.author.id == 819288373901918218
+            return ctx.message.author.id == os.getenv("OWNERUSERID")
         return commands.check(predicate)
 
     # Owner commands
