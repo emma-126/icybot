@@ -35,6 +35,8 @@ class Bot(commands.Bot):
         handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
         discord.utils.setup_logging(level=logging.INFO, handler=handler, root=False)
 
+        Bot.owner_user_id = int(os.getenv("OWNERUSERID"))
+
 async def main():
     bot = Bot()
     bot.remove_command('help')
@@ -42,7 +44,7 @@ async def main():
 
     def is_owner():
         def predicate(ctx):
-            return ctx.message.author.id == os.getenv("OWNERUSERID")
+            return ctx.message.author.id == bot.owner_user_id
         return commands.check(predicate)
 
     # Owner commands
