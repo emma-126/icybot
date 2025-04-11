@@ -2,6 +2,7 @@ import tracemalloc
 import logging
 
 import asyncio
+import random
 import os
 from dotenv import load_dotenv
 
@@ -76,6 +77,11 @@ async def main():
     async def avatar(ctx, member: discord.Member = None):
         member = member or ctx.author
         await ctx.send(member.display_avatar)
+
+    @bot.command(aliases=['cf'])
+    async def coinflip(ctx):
+        em = create_embed(ctx.author, f'Flipping a coin... {random.choice(bot.coin_responses)}!')
+        await ctx.send(embed=em)
 
     @bot.command()
     async def ping(ctx):
