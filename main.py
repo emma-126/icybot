@@ -40,6 +40,9 @@ class Bot(commands.Bot):
 
 async def main():
     bot = Bot()
+    bot.database = Database()
+    bot.economy = Economy(bot)
+
     bot.remove_command('help')
     bot.coin_responses = ['heads', 'tails']
 
@@ -86,6 +89,34 @@ async def main():
     @bot.command()
     async def ping(ctx):
         em = create_embed(ctx.author, 'pong')
+        await ctx.send(embed=em)
+
+    # Economy commands
+    @bot.command(aliases=['bal'])
+    async def balance(ctx, member: discord.Member = None):
+        member = member or ctx.author
+        balance = await bot.economy.check_balance(member.id)
+        em = create_embed(member, f'Wallet: {balance[0]}\nVault: {balance[1]}\nNet Worth: {balance[2]}')
+        await ctx.send(embed=em)
+
+    @bot.command(aliases=['dep'])
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def deposit(ctx, amount):
+        balance = await bot.economy.wallet_to_vault(ctx.author.id, amount)
+        if balance is True:
+            em = create_embed(ctx.author, f'Successfully deposited {amount} into your vault.')
+        else:
+            em = create_embed(ctx.author, f"You can't deposit {amount} into your vault, because you only have {balance[0]} in your wallet.")
+        await ctx.send(embed=em)
+
+    @bot.command(aliases=['with'])
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    async def withdraw(ctx, amount):
+        balance = await bot.economy.vault_to_wallet(ctx.author.id, amount)
+        if balance is True:
+            em = create_embed(ctx.author, f'Successfully withdrew {amount} from your vault.')
+        else:
+            em = create_embed(ctx.author, f"You can't withdraw {amount} into your wallet, because you only have {balance[1]} in your vault.")
         await ctx.send(embed=em)
 
     async with bot:
