@@ -9,6 +9,9 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 
+from database import Database
+from economy import Economy
+
 tracemalloc.start()
 load_dotenv()
 
@@ -102,6 +105,7 @@ async def main():
     @bot.command(aliases=['dep'])
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def deposit(ctx, amount):
+        amount = int(amount)
         balance = await bot.economy.wallet_to_vault(ctx.author.id, amount)
         if balance is True:
             em = create_embed(ctx.author, f'Successfully deposited {amount} into your vault.')
@@ -112,6 +116,7 @@ async def main():
     @bot.command(aliases=['with'])
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def withdraw(ctx, amount):
+        amount = int(amount)
         balance = await bot.economy.vault_to_wallet(ctx.author.id, amount)
         if balance is True:
             em = create_embed(ctx.author, f'Successfully withdrew {amount} from your vault.')
