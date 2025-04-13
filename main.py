@@ -69,6 +69,40 @@ async def main():
             traceback.print_exc()
 
     @bot.command()
+    @commands.cooldown(1, 3, commands.BucketType.member)
+    @is_owner()
+    async def set_money(ctx, member: discord.Member, wallet, vault):
+        try:
+            user_id = int(member.id)
+            wallet = int(wallet)
+            vault = int(vault)
+        except:
+            raise TypeError
+        if wallet < 0 or vault < 0:
+            raise ValueError
+        success = await bot.economy.set_money(user_id, wallet, vault)
+        if success is True:
+            em = create_embed(ctx.author, f"Successfully set user {member.display_name}'s wallet and vault to {wallet} and {vault}.")
+            await ctx.send(embed=em)
+
+    @set_money.error
+    async def on_set_money_error(ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.MissingRequiredArgument):
+            em = create_embed(ctx.author, 'Please specify a user id, wallet amount, and vault amount.')
+            await ctx.send(embed=em)
+            return
+        elif isinstance(error, commands.CommandError):
+            error = error.original
+            if isinstance(error, ValueError):
+                em = create_embed(ctx.author, 'Please specify positive numbers.')
+            elif isinstance(error, TypeError):
+                em = create_embed(ctx.author, 'Please specify numbers numerically.')
+            await ctx.send(embed=em)
+            return
+        else:
+            traceback.print_exc()
+
+    @bot.command()
     @is_owner()
     async def shutdown(ctx):
         await ctx.send('Shutting down...')
@@ -118,7 +152,7 @@ async def main():
         em = create_embed(ctx.author, 'pong')
         await ctx.send(embed=em)
 
-    @bot.command(aliases=['rand'])
+    @bot.command(aliases=['random','rand'])
     async def random_number(ctx, num1, num2 = None):
         try:
             num1 = int(num1)

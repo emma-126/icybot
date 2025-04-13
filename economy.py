@@ -44,3 +44,13 @@ class Economy:
             values = (wallet, vault, user_id)
             await self.bot.database.update_money_data(values)
             return True
+
+    async def set_money(self, user_id, wallet, vault):
+        user_exists = await self.bot.database.query_user_exists(user_id)
+        if user_exists is True:
+            values = (wallet, vault, user_id)
+            await self.bot.database.update_money_data(values)
+        else:
+            values = (user_id, wallet, vault)
+            await self.bot.database.insert_money_data(values)
+        return True
