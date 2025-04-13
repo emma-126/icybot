@@ -99,7 +99,7 @@ async def main():
     @bot.command()
     @commands.cooldown(1, 1)
     async def help(ctx):
-        em = create_embed(ctx.author, "Commands: help, avatar, coinflip, ping, balance, deposit, withdraw")
+        em = create_embed(ctx.author, "Commands: help, avatar, coinflip, ping, random, balance, deposit, withdraw")
         await ctx.send(embed=em)
 
     # Fun commands
@@ -117,6 +117,36 @@ async def main():
     async def ping(ctx):
         em = create_embed(ctx.author, 'pong')
         await ctx.send(embed=em)
+
+    @bot.command(aliases=['rand'])
+    async def random_number(ctx, num1, num2 = None):
+        try:
+            num1 = int(num1)
+            if num2 is not None:
+                num2 = int(num2)
+        except:
+            raise TypeError
+        if num2 is None:
+            number = random.randint(1, num1)
+        else:
+            number = random.randint(num1, num2)
+        em = create_embed(ctx.author, f'Generating random number... {number}!')
+        await ctx.send(embed=em)
+
+    @random_number.error
+    async def on_random_number_error(ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.MissingRequiredArgument):
+            em = create_embed(ctx.author, 'Please specify at least one number.')
+            await ctx.send(embed=em)
+            return
+        elif isinstance(error, commands.CommandError):
+            error = error.original
+            if isinstance(error, TypeError):
+                em = create_embed(ctx.author, 'Please specify one or two numbers.')
+            await ctx.send(embed=em)
+            return
+        else:
+            traceback.print_exc()
 
     # Economy commands
     @bot.command(aliases=['bal'])
