@@ -129,7 +129,10 @@ async def main():
     @bot.command(aliases=['dep'])
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def deposit(ctx, amount):
-        amount = int(amount)
+        try:
+            amount = int(amount)
+        except:
+            raise TypeError
         if amount < 1:
             raise ValueError
         balance = await bot.economy.wallet_to_vault(ctx.author.id, amount)
@@ -145,7 +148,7 @@ async def main():
             error = error.original
             if isinstance(error, ValueError):
                 em = create_embed(ctx.author, 'Please deposit an amount larger than zero.')
-            if isinstance(error, TypeError):
+            elif isinstance(error, TypeError):
                 em = create_embed(ctx.author, 'Please deposit a numeric amount.')
             await ctx.send(embed=em)
             return
@@ -155,7 +158,10 @@ async def main():
     @bot.command(aliases=['with'])
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def withdraw(ctx, amount):
-        amount = int(amount)
+        try:
+            amount = int(amount)
+        except:
+            raise TypeError
         if amount < 1:
             raise ValueError
         balance = await bot.economy.vault_to_wallet(ctx.author.id, amount)
@@ -171,7 +177,7 @@ async def main():
             error = error.original
             if isinstance(error, ValueError):
                 em = create_embed(ctx.author, 'Please withdraw an amount larger than zero.')
-            if isinstance(error, TypeError):
+            elif isinstance(error, TypeError):
                 em = create_embed(ctx.author, 'Please withdraw a numeric amount.')
             await ctx.send(embed=em)
             return
