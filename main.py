@@ -1,4 +1,4 @@
-import tracemalloc
+import traceback
 import logging
 
 import asyncio
@@ -12,7 +12,6 @@ from discord.ext import commands
 from database import Database
 from economy import Economy
 
-tracemalloc.start()
 load_dotenv()
 
 def create_embed(author, description, url = None, title = None):
@@ -61,21 +60,46 @@ async def main():
         await ctx.send('Goodbye.')
         await ctx.guild.leave()
 
+    @leave_guild.error
+    async def on_leave_guild_error(ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send(f"I'm sorry {ctx.author.display_name}, I'm afraid I can't do that.")
+            return
+        else:
+            traceback.print_exc()
+
     @bot.command()
     @is_owner()
     async def shutdown(ctx):
-        try:
-            await ctx.send('Shutting down...')
-            await bot.close()
-        except Exception as error:
-            print(error)
-            await ctx.send('Something went wrong.')
+        await ctx.send('Shutting down...')
+        await bot.close()
+
+    @shutdown.error
+    async def on_shutdown_error(ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send(f"I'm sorry {ctx.author.display_name}, I'm afraid I can't do that.")
+            return
+        else:
+            traceback.print_exc()
+
+    @bot.command()
+    @is_owner()
+    async def test(ctx):
+        await ctx.send('test')
+
+    @test.error
+    async def on_test_error(ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send(f"I'm sorry {ctx.author.display_name}, I'm afraid I can't do that.")
+            return
+        else:
+            traceback.print_exc()
 
     # Info commands
     @bot.command()
     @commands.cooldown(1, 1)
     async def help(ctx):
-        em = create_embed(ctx.author, "lol there is no help message yet")
+        em = create_embed(ctx.author, "Commands: help, avatar, coinflip, ping, balance, deposit, withdraw")
         await ctx.send(embed=em)
 
     # Fun commands
@@ -106,6 +130,8 @@ async def main():
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def deposit(ctx, amount):
         amount = int(amount)
+        if amount < 1:
+            raise ValueError
         balance = await bot.economy.wallet_to_vault(ctx.author.id, amount)
         if balance is True:
             em = create_embed(ctx.author, f'Successfully deposited {amount} into your vault.')
@@ -117,6 +143,8 @@ async def main():
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def withdraw(ctx, amount):
         amount = int(amount)
+        if amount < 1:
+            raise ValueError
         balance = await bot.economy.vault_to_wallet(ctx.author.id, amount)
         if balance is True:
             em = create_embed(ctx.author, f'Successfully withdrew {amount} from your vault.')
