@@ -139,6 +139,19 @@ async def main():
             em = create_embed(ctx.author, f"You can't deposit {amount} into your vault, because you only have {balance[0]} in your wallet.")
         await ctx.send(embed=em)
 
+    @deposit.error
+    async def on_deposit_error(ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.ValueError):
+            em = create_embed(ctx.author, "Please deposit an amount larger than zero.")
+            await ctx.send(embed=em)
+            return
+        elif isinstance(error, commands.TypeError):
+            em = create_embed(ctx.author, "Please enter your amount in numeric format.")
+            await ctx.send(embed=em)
+            return
+        else:
+            traceback.print_exc()
+
     @bot.command(aliases=['with'])
     @commands.cooldown(1, 3, commands.BucketType.member)
     async def withdraw(ctx, amount):
@@ -151,6 +164,19 @@ async def main():
         else:
             em = create_embed(ctx.author, f"You can't withdraw {amount} into your wallet, because you only have {balance[1]} in your vault.")
         await ctx.send(embed=em)
+
+    @withdraw.error
+    async def on_withdraw_error(ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.ValueError):
+            em = create_embed(ctx.author, "Please withdraw an amount larger than zero.")
+            await ctx.send(embed=em)
+            return
+        elif isinstance(error, commands.TypeError):
+            em = create_embed(ctx.author, "Please enter your amount in numeric format.")
+            await ctx.send(embed=em)
+            return
+        else:
+            traceback.print_exc()
 
     async with bot:
         await bot.start(os.getenv("TOKEN"))
