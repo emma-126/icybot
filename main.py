@@ -87,7 +87,10 @@ async def main():
 
     @set_money.error
     async def on_set_money_error(ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.MissingRequiredArgument):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send(f"I'm sorry {ctx.author.display_name}, I'm afraid I can't do that.")
+            return
+        elif isinstance(error, commands.MissingRequiredArgument):
             em = create_embed(ctx.author, 'Please specify a user id, wallet amount, and vault amount.')
             await ctx.send(embed=em)
             return
