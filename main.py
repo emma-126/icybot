@@ -141,12 +141,12 @@ async def main():
 
     @deposit.error
     async def on_deposit_error(ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.ValueError):
-            em = create_embed(ctx.author, "Please deposit an amount larger than zero.")
-            await ctx.send(embed=em)
-            return
-        elif isinstance(error, commands.TypeError):
-            em = create_embed(ctx.author, "Please enter your amount in numeric format.")
+        if isinstance(error, commands.CommandError):
+            error = error.original
+            if isinstance(error, ValueError):
+                em = create_embed(ctx.author, 'Please deposit an amount larger than zero.')
+            if isinstance(error, TypeError):
+                em = create_embed(ctx.author, 'Please deposit a numeric amount.')
             await ctx.send(embed=em)
             return
         else:
@@ -167,12 +167,12 @@ async def main():
 
     @withdraw.error
     async def on_withdraw_error(ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.ValueError):
-            em = create_embed(ctx.author, "Please withdraw an amount larger than zero.")
-            await ctx.send(embed=em)
-            return
-        elif isinstance(error, commands.TypeError):
-            em = create_embed(ctx.author, "Please enter your amount in numeric format.")
+        if isinstance(error, commands.CommandError):
+            error = error.original
+            if isinstance(error, ValueError):
+                em = create_embed(ctx.author, 'Please withdraw an amount larger than zero.')
+            if isinstance(error, TypeError):
+                em = create_embed(ctx.author, 'Please withdraw a numeric amount.')
             await ctx.send(embed=em)
             return
         else:
