@@ -144,7 +144,11 @@ async def main():
 
     @deposit.error
     async def on_deposit_error(ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandError):
+        if isinstance(error, commands.MissingRequiredArgument):
+            em = create_embed(ctx.author, 'Please deposit an amount.')
+            await ctx.send(embed=em)
+            return
+        elif isinstance(error, commands.CommandError):
             error = error.original
             if isinstance(error, ValueError):
                 em = create_embed(ctx.author, 'Please deposit an amount larger than zero.')
@@ -173,7 +177,11 @@ async def main():
 
     @withdraw.error
     async def on_withdraw_error(ctx: commands.Context, error: commands.CommandError):
-        if isinstance(error, commands.CommandError):
+        if isinstance(error, commands.MissingRequiredArgument):
+            em = create_embed(ctx.author, 'Please withdraw an amount.')
+            await ctx.send(embed=em)
+            return
+        elif isinstance(error, commands.CommandError):
             error = error.original
             if isinstance(error, ValueError):
                 em = create_embed(ctx.author, 'Please withdraw an amount larger than zero.')
